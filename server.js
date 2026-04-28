@@ -13,7 +13,7 @@ connectDB();
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
+app.use(express.static(path.join(__dirname, 'frontend')));
 
 // Session Configuration
 app.use(session({
@@ -60,9 +60,9 @@ app.use('/admin', require('./routes/admin'));
 
 // Catch-all for HTML files (optional since static middleware handles it, 
 // but good for direct route access)
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'dashboard.html')));
-app.get('/admin-panel', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'admin.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'frontend', 'index.html')));
+app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'frontend', 'dashboard.html')));
+app.get('/admin-panel', (req, res) => res.sendFile(path.join(__dirname, 'frontend', 'admin.html')));
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
