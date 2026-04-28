@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Lumina Bank</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="dashboard-wrapper">
+        <aside class="sidebar no-print">
+            <div class="sidebar-header">
+                <h2>Lumina</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" onclick="showSection('summary')">
+                    <span>🏠 Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="showSection('transfer')">
+                    <span>💸 Transfer</span>
+                </div>
+                <div class="nav-item" onclick="showSection('history')">
+                    <span>📜 Transactions</span>
+                </div>
+                <div class="nav-item" onclick="showSection('fd')">
+                    <span>📈 Fixed Deposit</span>
+                </div>
+                <div class="nav-item" onclick="showSection('beneficiaries')">
+                    <span>👥 Beneficiaries</span>
+                </div>
+                <div class="nav-item" onclick="showSection('checkbook')">
+                    <span>📑 Checkbook</span>
+                </div>
+                <div class="nav-item" onclick="showSection('profile')">
+                    <span>👤 My Profile</span>
+                </div>
+                <div class="nav-item" onclick="logout()">
+                    <span>🚪 Logout</span>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar no-print">
+                <h3 id="welcome-msg">Welcome, User</h3>
+                <div class="last-login" id="last-login-ts" style="font-size: 0.8rem; color: #666;"></div>
+            </header>
+
+            <div id="global-alert" class="alert no-print"></div>
+
+            <!-- Summary Section -->
+            <section id="sec-summary" class="dashboard-section">
+                <div class="card balance-card">
+                    <p>Available Balance</p>
+                    <div class="balance-amount" id="dash-balance">₹0.00</div>
+                    <div class="account-number">
+                        <span id="dash-acc-no">XXXXXX0000</span>
+                        <span style="cursor:pointer" onclick="toggleAccMask()" id="eye-icon">👁️</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;" class="no-print">
+                    <button class="btn btn-primary" style="flex: 1" onclick="showSection('deposit')">Deposit</button>
+                    <button class="btn btn-primary" style="flex: 1; background: #333;" onclick="showSection('withdraw')">Withdraw</button>
+                    <button class="btn btn-primary" style="flex: 1; background: var(--secondary); color: #000;" onclick="showSection('transfer')">Quick Transfer</button>
+                </div>
+
+                <div class="card">
+                    <h3>Mini Statement (Last 5 Transactions)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mini-statement-body"></tbody>
+                    </table>
+                    <button class="btn-link" onclick="showSection('history')">View All Transactions</button>
+                </div>
+            </section>
+
+            <!-- Transfer Section -->
+            <section id="sec-transfer" class="dashboard-section" style="display: none;">
+                <div class="card">
+                    <h3>Money Transfer</h3>
+                    <form id="transfer-form">
+                        <div class="form-group">
+                            <label>Select Beneficiary</label>
+                            <select id="trans-beneficiary" required>
+                                <option value="">Choose Beneficiary</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" id="trans-amount" required min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Transaction PIN</label>
+                            <input type="password" id="trans-pin" maxlength="4" placeholder="1234" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description (Optional)</label>
+                            <input type="text" id="trans-desc">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Money</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Deposit/Withdraw Section -->
+            <section id="sec-deposit" class="dashboard-section" style="display: none;">
+                <div class="card">
+                    <h3>Add Money to Account</h3>
+                    <form id="deposit-form">
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" id="dep-amount" required min="1">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Deposit</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="sec-withdraw" class="dashboard-section" style="display: none;">
+                <div class="card">
+                    <h3>Withdraw Cash</h3>
+                    <form id="withdraw-form">
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" id="with-amount" required min="1">
+                        </div>
+                        <p style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">Note: Minimum ₹500 must remain in account.</p>
+                        <button type="submit" class="btn btn-primary">Withdraw</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Transaction History Section -->
+            <section id="sec-history" class="dashboard-section" style="display: none;">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>Transaction History</h3>
+                        <button class="btn btn-primary no-print" style="width: auto; padding: 0.5rem 1rem;" onclick="window.print()">Print Statement</button>
+                    </div>
+                    <div class="no-print" style="margin: 1rem 0; display: flex; gap: 10px; align-items: flex-end;">
+                        <div class="form-group" style="margin:0">
+                            <label>Filter</label>
+                            <select id="hist-filter" onchange="loadTransactions()">
+                                <option value="">All Time</option>
+                                <option value="7">Last 7 Days</option>
+                                <option value="30">Last 30 Days</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin:0">
+                            <label>From</label>
+                            <input type="date" id="hist-from">
+                        </div>
+                        <div class="form-group" style="margin:0">
+                            <label>To</label>
+                            <input type="date" id="hist-to">
+                        </div>
+                        <button class="btn btn-primary" style="width: auto; height: 38px;" onclick="loadTransactions()">Apply</button>
+                    </div>
+                    <table id="full-statement">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Balance After</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Fixed Deposit Section -->
+            <section id="sec-fd" class="dashboard-section" style="display: none;">
+                <div class="card">
+                    <h3>Open Fixed Deposit</h3>
+                    <form id="fd-form">
+                        <div class="form-group">
+                            <label>Deposit Amount (₹)</label>
+                            <input type="number" id="fd-amount" required min="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>Tenure (Months)</label>
+                            <select id="fd-tenure" required onchange="calcFD()">
+                                <option value="3">3 Months (5% p.a.)</option>
+                                <option value="6">6 Months (6% p.a.)</option>
+                                <option value="12">12 Months (7% p.a.)</option>
+                                <option value="24">24 Months (7.5% p.a.)</option>
+                                <option value="36">36 Months (8% p.a.)</option>
+                            </select>
+                        </div>
+                        <div id="fd-calc-result" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            Maturity Amount: ₹0.00
+                        </div>
+                        <button type="submit" class="btn btn-primary">Open FD</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>My Fixed Deposits</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Amount</th>
+                                <th>Rate</th>
+                                <th>Maturity Date</th>
+                                <th>Maturity Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fd-list-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Beneficiaries Section -->
+            <section id="sec-beneficiaries" class="dashboard-section" style="display: none;">
+                <div class="card">
+                    <h3>Add Beneficiary</h3>
+                    <div id="ben-alert" class="alert"></div>
+                    <form id="beneficiary-form">
+                        <div class="form-group">
+                            <label>Account Number</label>
+                            <input type="text" id="ben-acc" required placeholder="Enter 10-digit account number">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Account Number</label>
+                            <input type="text" id="ben-confirm" required placeholder="Re-enter account number">
+                        </div>
+                        <div class="form-group">
+                            <label>Nickname</label>
+                            <input type="text" id="ben-nick" required placeholder="e.g. John's Account">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Beneficiary</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>My Beneficiaries</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nickname</th>
+                                <th>Account Number</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ben-list-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Checkbook Section -->
+            <section id="sec-checkbook" class="dashboard-section" style="display: none;">
+                <div class="card">
+                    <h3>Request New Checkbook</h3>
+                    <p style="margin-bottom: 1rem;">Your 25-leaf checkbook will be delivered to your registered address.</p>
+                    <button class="btn btn-primary" onclick="requestCheckbook()">Submit Request</button>
+                </div>
+                <div class="card">
+                    <h3>Request Status</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Request Date</th>
+                                <th>Status</th>
+                                <th>Approval Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="checkbook-list-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="sec-profile" class="dashboard-section" style="display: none;">
+                <div class="card">
+                    <h3>My Profile</h3>
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label>Account Number</label>
+                            <input type="text" id="prof-acc" readonly style="background: #eee;">
+                        </div>
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="prof-name" readonly style="background: #eee;">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="prof-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="text" id="prof-phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <textarea id="prof-address" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Change Password</h3>
+                    <form id="change-pass-form">
+                        <div class="form-group">
+                            <label>Old Password</label>
+                            <input type="password" id="pass-old" required>
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" id="pass-new" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </form>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

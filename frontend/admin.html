@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Lumina Bank</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-sidebar { background-color: #333; }
+        .admin-nav-item:hover, .admin-nav-item.active { border-left-color: #ff5722; }
+    </style>
+</head>
+<body>
+    <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="dashboard-wrapper">
+        <aside class="sidebar admin-sidebar">
+            <div class="sidebar-header">
+                <h2>Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active admin-nav-item" onclick="showAdminSection('users')">
+                    <span>👥 Users</span>
+                </div>
+                <div class="nav-item admin-nav-item" onclick="showAdminSection('transactions')">
+                    <span>📜 Transactions</span>
+                </div>
+                <div class="nav-item admin-nav-item" onclick="showAdminSection('checkbooks')">
+                    <span>📑 Checkbooks</span>
+                </div>
+                <div class="nav-item admin-nav-item" onclick="showAdminSection('logs')">
+                    <span>📋 System Logs</span>
+                </div>
+                <div class="nav-item" onclick="logout()">
+                    <span>🚪 Logout</span>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <h3>Admin Control Center</h3>
+            </header>
+
+            <div id="admin-alert" class="alert"></div>
+
+            <!-- Users Section -->
+            <section id="adm-users" class="admin-section">
+                <div class="card">
+                    <h3>All Registered Users</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Account Number</th>
+                                <th>Balance</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adm-users-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Transactions Section -->
+            <section id="adm-transactions" class="admin-section" style="display: none;">
+                <div class="card">
+                    <h3>System-Wide Transactions</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adm-trans-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Checkbook Requests Section -->
+            <section id="adm-checkbooks" class="admin-section" style="display: none;">
+                <div class="card">
+                    <h3>Pending Checkbook Requests</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Request Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adm-checkbook-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- System Logs Section -->
+            <section id="adm-logs" class="admin-section" style="display: none;">
+                <div class="card">
+                    <h3>Activity Logs</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>IP Address</th>
+                                <th>Timestamp</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adm-logs-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
